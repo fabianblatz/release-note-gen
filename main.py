@@ -1,9 +1,11 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 from git import Repo
 import os
 import argparse
 import re
 import collections
+import sys
 
 def collect_commits(path, since, until):
     repo = Repo(path)
@@ -37,12 +39,14 @@ def build_notes(commit_dict):
         messages = commit_dict[k]
         message_buf = "; ".join(messages)
         if 'misc' == k:
-            res+= "• Miscellaneous: " + message_buf +"\n"
+            res+= "* Miscellaneous: " + message_buf +"\n"
         else:
             res+=template.format(key=k, message=message_buf)+"\n"
     return res
 
 if __name__ == "__main__":
+    reload(sys)  
+    sys.setdefaultencoding('utf-8')
     parser = argparse.ArgumentParser()
     parser.add_argument("-V", "--version", help="show program version", action="store_true")
     parser.add_argument("-p", "--project", help="jira project key")
@@ -51,7 +55,6 @@ if __name__ == "__main__":
     parser.add_argument("-u", "--until", help="tag or commit until commits will be watched")
 
     args = parser.parse_args()
-    
     if not args.repo:
         print("provide a repo you -.-")    
         exit(1);
