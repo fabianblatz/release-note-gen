@@ -6,6 +6,7 @@ import argparse
 import re
 import collections
 import sys
+from jinja2 import Template 
 
 def collect_commits(path, since, until):
     repo = Repo(path)
@@ -31,17 +32,15 @@ def build_issue_dict(commits, project):
     return issues 
 
 def build_notes(commit_dict):
-    template = "{key} - {message}"
+    template = """{{ key }} - {% for commit in commits %}{{ commit }}; {% endfor %}"""
     res=""
     with open("commit.template","r+") as f:
-        template=f.readline()
+        template=f.read()
+
+    jinja_temp = Template(template)
     for k in commit_dict:
-        messages = commit_dict[k]
-        message_buf = "; ".join(messages)
-        if 'misc' == k:
-            res+= "* Miscellaneous: " + message_buf +"\n"
-        else:
-            res+=template.format(key=k, message=message_buf)+"\n"
+        res += jinja_temp.render(key=k, commits=commit_dict[k])
+      
     return res
 
 if __name__ == "__main__":
